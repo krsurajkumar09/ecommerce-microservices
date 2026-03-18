@@ -1,11 +1,11 @@
-package product_service.Service;
+package product_service.service;
 
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import product_service.Entity.Product;
-import product_service.Repository.ProductRepository;
+import product_service.entity.Product;
+import product_service.repository.ProductRepository;
 
 @Service
 @RequiredArgsConstructor

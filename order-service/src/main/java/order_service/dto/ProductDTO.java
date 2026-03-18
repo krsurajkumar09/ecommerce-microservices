@@ -1,4 +1,4 @@
-package product_service.DTO;
+package order_service.dto;
 
 import lombok.Data;
 

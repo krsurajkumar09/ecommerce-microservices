@@ -1,9 +1,9 @@
-package product_service.Controller;
+package product_service.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import product_service.Entity.Product;
-import product_service.Service.ProductService;
+import product_service.entity.Product;
+import product_service.service.ProductService;
 
 @RestController
 @RequestMapping("/products")

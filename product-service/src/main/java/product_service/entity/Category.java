@@ -1,4 +1,4 @@
-package product_service.Entity;
+package product_service.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
