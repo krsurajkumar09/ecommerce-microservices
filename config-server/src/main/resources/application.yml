@@ -1,0 +1,25 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-server
+
+  profiles:
+    active: native   # ? using local file system instead of Git
+
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: file:///D:/Java Interview Questions/Java Coding\Ecommerce\config-repo
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka   # ? connect to Eureka
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"   # ? for actuator (health, refresh etc.)
