@@ -1,0 +1,23 @@
+<configuration>
+
+    <!-- ✅ Console Appender -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss} [%thread] %-5level %logger - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- ✅ Logstash Appender (optional) -->
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>localhost:5000</destination>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+    </appender>
+
+    <!-- ✅ Root Logger -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <!-- Comment this if ELK not running -->
+        <appender-ref ref="LOGSTASH"/>
+    </root>
+
+</configuration>

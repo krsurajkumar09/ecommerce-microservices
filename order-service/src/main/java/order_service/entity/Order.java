@@ -1,5 +1,6 @@
 package order_service.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
@@ -18,5 +19,6 @@ public class Order {
     private String reference;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @JsonManagedReference   // ✅ FIX
     private List<OrderLine> orderLines;
 }

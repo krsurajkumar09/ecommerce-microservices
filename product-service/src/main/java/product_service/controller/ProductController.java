@@ -2,6 +2,7 @@ package product_service.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import product_service.dto.ProductDTO;
 import product_service.entity.Product;
 import product_service.service.ProductService;
 
@@ -18,7 +19,7 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public Product get(@PathVariable Long id) {
+    public ProductDTO get(@PathVariable Long id) {
         return service.getProduct(id);
     }
 }
