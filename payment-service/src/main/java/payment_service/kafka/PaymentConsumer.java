@@ -14,9 +14,17 @@ public class PaymentConsumer {
 
     private final PaymentService paymentService;
 
-    @KafkaListener(topics = "order-created", groupId = "payment-group")
+    @KafkaListener(
+            topics = "order-created",
+            groupId = "payment-group"
+    )
     public void consume(OrderEvent event) {
+
+        // 🔥 HARD LOG (always visible)
+        System.out.println("🔥🔥🔥 EVENT RECEIVED IN PAYMENT SERVICE: " + event);
+
         log.info("Received Order Event: {}", event);
+
         paymentService.processPayment(event);
     }
 }

@@ -7,11 +7,11 @@
         </encoder>
     </appender>
 
-    <!-- ✅ Logstash Appender (optional) -->
-    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>localhost:5000</destination>
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
-    </appender>
+<!--    &lt;!&ndash; ✅ Logstash Appender (optional) &ndash;&gt;-->
+<!--    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">-->
+<!--        <destination>localhost:5000</destination>-->
+<!--        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>-->
+<!--    </appender>-->
 
     <!-- ✅ Root Logger -->
     <root level="INFO">

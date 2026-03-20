@@ -10,28 +10,55 @@ spring:
     username: root
     password: root
 
-  zipkin:
-    base-url: http://localhost:9411
+  jpa:
+    hibernate:
+      ddl-auto: update
 
   kafka:
     bootstrap-servers: localhost:9092
+
+    consumer:
+      group-id: payment-group
+      auto-offset-reset: earliest
+      enable-auto-commit: true
+
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.value.default.type: payment_service.dto.OrderEvent   # ✅ IMPORTANT
+
+    listener:
+      ack-mode: record
 
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka
 
-management:
-  tracing:
-    sampling:
-      probability: 1.0
+# 🔥 LOG FIX (VERY IMPORTANT)
+logging:
+  level:
+    root: INFO
+    com.netflix.discovery: WARN
+    org.springframework.cloud: WARN
+    org.apache.kafka: WARN
+    org.hibernate.SQL: ERROR
 
-  endpoints:
-    web:
-      exposure:
-        include: "*"
 
-  metrics:
-    export:
-      prometheus:
-        enabled: true
+# ✅ Optional (keep if you want tracing logs)
+#management:
+#  tracing:
+#    sampling:
+#      probability: 1.0
+#
+#  endpoints:
+#    web:
+#      exposure:
+#        include: "*"
+#
+#  metrics:
+#    export:
+#      prometheus:
+#        enabled: true

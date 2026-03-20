@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import payment_service.dto.OrderEvent;
 import payment_service.entity.Payment;
-import payment_service.kafka.PaymentProducer;
 import payment_service.repository.PaymentRepository;
 
 import java.util.Random;
@@ -17,20 +16,21 @@ import java.util.UUID;
 public class PaymentService {
 
     private final PaymentRepository repository;
-    private final PaymentProducer producer;
+    private final payment_service.kafka.PaymentProducer producer;
 
     public void processPayment(OrderEvent event) {
 
-        // 🔥 Idempotency check
         if (repository.findByOrderId(event.getOrderId()).isPresent()) {
             log.warn("Payment already processed for order: {}", event.getOrderId());
             return;
         }
 
+        log.info("Processing payment for order {}", event.getOrderId());
+
         Payment payment = new Payment();
         payment.setOrderId(event.getOrderId());
         payment.setReference(UUID.randomUUID().toString());
-        payment.setAmount(100.0); // calculate properly
+        payment.setAmount(100.0);
 
         boolean success = new Random().nextBoolean();
 
@@ -43,5 +43,8 @@ public class PaymentService {
         }
 
         repository.save(payment);
+
+        log.info("Payment completed for order {} with status {}",
+                event.getOrderId(), payment.getStatus());
     }
 }

@@ -5,43 +5,55 @@ spring:
   application:
     name: NOTIFICATION-SERVICE
 
-  zipkin:
-    base-url: http://localhost:9411
-
   kafka:
-    bootstrap-servers: localhost:9092
     consumer:
-      group-id: notification-group
+      group-id: notification-group-v2
       auto-offset-reset: earliest
 
+      # 🔥 IMPORTANT FIX
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+
+      properties:
+        # Delegate actual deserializers
+        spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+
+        # 🔥 CRITICAL FIX (Ignore package mismatch)
+        spring.json.use.type.headers: false
+
+        # Use your local DTO
+        spring.json.value.default.type: notification_service.dto.OrderEvent
+
+        # Allow all packages
+        spring.json.trusted.packages: "*"
+
+  # Email config (use real creds later)
   mail:
     host: smtp.gmail.com
     port: 587
     username: your-email@gmail.com
     password: your-app-password
     properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
 
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka
 
-management:
-  tracing:
-    sampling:
-      probability: 1.0
-
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-
-  metrics:
-    export:
-      prometheus:
-        enabled: true
+#management:
+#  tracing:
+#    sampling:
+#      probability: 1.0
+#
+#  endpoints:
+#    web:
+#      exposure:
+#        include: "*"
+#
+#  metrics:
+#    export:
+#      prometheus:
+#        enabled: true

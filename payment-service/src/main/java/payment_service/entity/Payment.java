@@ -15,13 +15,12 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "order_id")
+    @Column(name = "order_id", unique = true)
     private Long orderId;
 
     private Double amount;
 
     private String status;
 
-    public void setReference(String string) {
-    }
+    private String reference;   // ✅ FIX: add field
 }
