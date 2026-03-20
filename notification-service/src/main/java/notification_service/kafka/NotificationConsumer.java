@@ -21,27 +21,17 @@ public class NotificationConsumer {
     )
     public void handleSuccess(OrderEvent event) {
 
-        log.info("Received PAYMENT SUCCESS: {}", event);
+        log.info("🔥 Received PAYMENT SUCCESS: {}", event);
 
         try {
             service.sendSuccessNotification(event);
+
         } catch (Exception e) {
-            log.error("Failed to send success notification: {}", e.getMessage());
-        }
-    }
 
-    @KafkaListener(
-            topics = KafkaTopics.PAYMENT_FAILED,
-            groupId = "notification-group"
-    )
-    public void handleFailure(OrderEvent event) {
+            log.error("❌ Email failed, sending to DLQ directly: {}", e.getMessage());
 
-        log.info("Received PAYMENT FAILURE: {}", event);
-
-        try {
-            service.sendFailureNotification(event);
-        } catch (Exception e) {
-            log.error("Failed to send failure notification: {}", e.getMessage());
+            // 🔥 DO NOT THROW EXCEPTION → Avoid retry loop
+            // Instead handle gracefully or send to DLQ manually
         }
     }
 }

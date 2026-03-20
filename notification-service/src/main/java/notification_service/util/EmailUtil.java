@@ -14,39 +14,35 @@ public class EmailUtil {
 
     private final JavaMailSender mailSender;
 
-    // ✅ Main method using DTO
     public void sendEmail(NotificationMessage msg) {
-        try {
-            SimpleMailMessage mail = new SimpleMailMessage();
-            mail.setTo(msg.getRecipient());
-            mail.setSubject(msg.getSubject());
-            mail.setText(msg.getBody());
 
-            mailSender.send(mail);
+        SimpleMailMessage mail = new SimpleMailMessage();
+        mail.setTo(msg.getRecipient());
+        mail.setSubject(msg.getSubject());
+        mail.setText(msg.getBody());
 
-            log.info("✅ Email sent to {}", msg.getRecipient());
+        mailSender.send(mail);
 
-        } catch (Exception e) {
-            log.error("❌ Email sending failed: {}", e.getMessage(), e);
-            throw e; // 🔥 Important for retry / debugging
-        }
+        log.info("✅ Email sent to {}", msg.getRecipient());
     }
 
-    // ✅ FIXED: Overloaded method now WORKS
+    // 🔥 MAIN METHOD USED BY SERVICE
     public void sendEmail(String to, String subject, String body) {
+
+        SimpleMailMessage mail = new SimpleMailMessage();
+        mail.setTo(to);
+        mail.setSubject(subject);
+        mail.setText(body);
+
         try {
-            SimpleMailMessage mail = new SimpleMailMessage();
-            mail.setTo(to);
-            mail.setSubject(subject);
-            mail.setText(body);
-
             mailSender.send(mail);
-
             log.info("✅ Email sent to {}", to);
 
         } catch (Exception e) {
-            log.error("❌ Email sending failed: {}", e.getMessage(), e);
-            throw e; // 🔥 Important
+            log.error("❌ Email failed for {}: {}", to, e.getMessage());
+
+            // 🔥 VERY IMPORTANT → propagate to Kafka
+            throw e;
         }
     }
 }

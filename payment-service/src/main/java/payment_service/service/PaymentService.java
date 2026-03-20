@@ -7,7 +7,6 @@ import payment_service.dto.OrderEvent;
 import payment_service.entity.Payment;
 import payment_service.repository.PaymentRepository;
 
-import java.util.Random;
 import java.util.UUID;
 
 @Service
@@ -16,35 +15,41 @@ import java.util.UUID;
 public class PaymentService {
 
     private final PaymentRepository repository;
-    private final payment_service.kafka.PaymentProducer producer;
 
-    public void processPayment(OrderEvent event) {
+    /**
+     * Processes payment and returns result
+     * true  -> SUCCESS
+     * false -> FAILED
+     */
+    public boolean processPayment(OrderEvent event) {
 
+        // ✅ Idempotency check (VERY IMPORTANT)
         if (repository.findByOrderId(event.getOrderId()).isPresent()) {
-            log.warn("Payment already processed for order: {}", event.getOrderId());
-            return;
+            log.warn("⚠️ Payment already processed for order: {}", event.getOrderId());
+            return false; // already processed (avoid duplicate events)
         }
 
-        log.info("Processing payment for order {}", event.getOrderId());
+        log.info("💳 Processing payment for order {}", event.getOrderId());
 
         Payment payment = new Payment();
         payment.setOrderId(event.getOrderId());
         payment.setReference(UUID.randomUUID().toString());
         payment.setAmount(100.0);
 
-        boolean success = new Random().nextBoolean();
+        // 🔥 Controlled logic (replace with real payment gateway later)
+        boolean success = event.getOrderId() % 2 != 0;
 
         if (success) {
             payment.setStatus("SUCCESS");
-            producer.sendSuccess(event);
         } else {
             payment.setStatus("FAILED");
-            producer.sendFailure(event);
         }
 
         repository.save(payment);
 
-        log.info("Payment completed for order {} with status {}",
+        log.info("✅ Payment completed for order {} with status {}",
                 event.getOrderId(), payment.getStatus());
+
+        return success;
     }
 }

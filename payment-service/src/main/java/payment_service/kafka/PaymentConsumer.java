@@ -13,6 +13,7 @@ import payment_service.service.PaymentService;
 public class PaymentConsumer {
 
     private final PaymentService paymentService;
+    private final PaymentProducer paymentProducer;
 
     @KafkaListener(
             topics = "order-created",
@@ -20,11 +21,24 @@ public class PaymentConsumer {
     )
     public void consume(OrderEvent event) {
 
-        // 🔥 HARD LOG (always visible)
-        System.out.println("🔥🔥🔥 EVENT RECEIVED IN PAYMENT SERVICE: " + event);
+        log.info("🔥 EVENT RECEIVED IN PAYMENT SERVICE: {}", event);
 
-        log.info("Received Order Event: {}", event);
+        try {
+            // ✅ SINGLE SOURCE OF TRUTH
+            boolean success = paymentService.processPayment(event);
 
-        paymentService.processPayment(event);
+            if (success) {
+                paymentProducer.sendSuccess(event);
+            } else {
+                paymentProducer.sendFailure(event);
+            }
+
+        } catch (Exception e) {
+
+            log.error("🚨 System failure while processing payment", e);
+
+            // 🔥 Retry for system failures only
+            throw e;
+        }
     }
 }
