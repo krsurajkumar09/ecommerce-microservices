@@ -1,5 +1,7 @@
 package order_service.service;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import order_service.client.ProductClient;
@@ -34,13 +36,8 @@ public class OrderService {
             throw new RuntimeException("Quantity must be greater than 0");
         }
 
-        // ✅ Call Product Service safely
-        ProductDTO product;
-        try {
-            product = productClient.getProduct(request.getProductId());
-        } catch (Exception e) {
-            throw new RuntimeException("Product not found");
-        }
+        // 🔥 Circuit Breaker + Retry call
+        ProductDTO product = getProductWithResilience(request.getProductId());
 
         // ✅ Stock validation
         if (product.getAvailableQuantity() < request.getQuantity()) {
@@ -61,7 +58,7 @@ public class OrderService {
 
         Order savedOrder = orderRepository.save(order);
 
-        // 🔥 Kafka Event (safe)
+        // 🔥 Kafka Event (async safe)
         try {
             OrderEvent event = new OrderEvent();
             event.setOrderId(savedOrder.getId());
@@ -78,4 +75,20 @@ public class OrderService {
 
         return savedOrder;
     }
+
+    // 🔥 RESILIENCE METHOD (FIXED)
+    @CircuitBreaker(name = "productService", fallbackMethod = "fallbackProduct")
+    @Retry(name = "productService")
+    public ProductDTO getProductWithResilience(Long productId) {
+        log.info("Calling Product Service for productId {}", productId);
+        return productClient.getProduct(productId);
+    }
+
+    // 🔥 FALLBACK (SIGNATURE MUST MATCH)
+    public ProductDTO fallbackProduct(Long productId, Throwable ex) {
+        log.error("🔥 Product Service DOWN for productId {}", productId);
+
+        throw new RuntimeException("Product Service unavailable. Cannot place order.");
+    }
+
 }
